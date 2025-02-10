@@ -1,0 +1,60 @@
+Roberto,
+
+Houve uma mudança no processo de autenticação que não estava prevista no escopo original da atividade. Inicialmente, trabalhamos com a autenticação via AWS_MSK_IAM, que exige o uso do Pod Identity Webhook. No entanto, agora foi solicitado que a autenticação seja feita via certificados SSL/TLS, o que exige uma reconfiguração da infraestrutura e da aplicação.
+
+Impactos dessa mudança:
+1️. Precisamos garantir que os Brokers do MSK estejam configurados corretamente para SSL/TLS.
+2. A aplicação precisa ser ajustada para utilizar certificados SSL/TLS em vez de autenticação IAM.
+3. Se a migração para Confluent realmente acontecer, será necessário garantir que a autenticação continue funcionando sem impacto para os Producers.
+
+Esse novo cenário pode exigir ajustes adicionais e testes para garantir que tudo funcione corretamente, o que pode afetar o prazo de entrega da atividade.
+
+ Próximos passos:
+
+Já repassamos essa mudança para a equipe de DevOps para validar a configuração necessária.
+Precisamos garantir que os certificados corretos estejam disponíveis e que a aplicação consiga se autenticar sem problemas.
+Vamos monitorar a implementação para garantir o sucesso da atividade.
+
+---
+
+Mensaje para el equipo de DevOps
+📢 "Confirmamos que la autenticación contra MSK debe hacerse mediante certificados SSL/TLS y no mediante AWS_MSK_IAM. Por lo tanto, necesitamos verificar que la infraestructura está correctamente configurada para ello."
+
+📌 Pasos a seguir:
+1️⃣ Verificar la configuración de autenticación en los Brokers de Kafka
+
+Ejecutar este comando para revisar la configuración de listeners y advertised.listeners:
+sh
+Copiar
+Editar
+kafka-configs.sh --bootstrap-server server1kafka.com:9092 --entity-type brokers --describe
+Confirmar que security.protocol=SSL o security.protocol=SASL_SSL está habilitado.
+2️⃣ Validar que los certificados SSL están correctamente configurados en la aplicación
+
+Revisar si el application.yml tiene la siguiente configuración:
+yaml
+Copiar
+Editar
+security:
+  protocol: SASL_SSL
+ssl:
+  truststore-location: /etc/kafka/secrets/kafka.client.truststore.jks
+  truststore-password: changeit
+  keystore-location: /etc/kafka/secrets/kafka.client.keystore.jks
+  keystore-password: changeit
+Si la aplicación sigue usando AWS_MSK_IAM, cambiarla a autenticación SSL.
+3️⃣ Si vamos a migrar a Confluent, validar que la autenticación seguirá siendo la misma
+
+Preguntar si ya tenemos los certificados correctos para la conexión con Confluent.
+Confirmar que los Producers no requerirán cambios en la configuración.
+
+---
+
+Entiendo. Si la autenticación contra MSK debe hacerse mediante certificados SSL/TLS y no mediante AWS_MSK_IAM, entonces el Pod Identity Webhook no es necesario.
+
+Próximos pasos:
+
+Verificar si la aplicación ya está configurada para autenticación con certificados SSL.
+Asegurar que los Brokers de MSK estén configurados correctamente para aceptar conexiones con autenticación SSL/TLS.
+Si vamos a migrar a Confluent, confirmar que la autenticación seguirá siendo con certificados y no cambiará el mecanismo de conexión.
+
