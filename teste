@@ -1,0 +1,9 @@
+📢 "El Pod Identity Webhook es necesario porque estamos usando AWS_MSK_IAM como mecanismo de autenticación en Apache Kafka en AWS MSK.
+
+📌 ¿Por qué es necesario?
+
+Nuestra aplicación (plateventpod en el namespace bamoe) se ejecuta en EKS y no tiene credenciales estáticas de AWS.
+En lugar de credenciales fijas, el pod usa una IAM Role asociada a un ServiceAccount para autenticarse en MSK.
+El Pod Identity Webhook intercepta las solicitudes y permite que la aplicación asuma la IAM Role correctamente.
+Si el Webhook está deshabilitado, la autenticación fallará y el Producer no podrá enviar mensajes a Kafka.
+
